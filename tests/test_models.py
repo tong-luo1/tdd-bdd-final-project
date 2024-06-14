@@ -104,7 +104,7 @@ class TestProductModel(unittest.TestCase):
     def test_read_a_product(self):
         """It should Read a Product"""
         product = ProductFactory()
-        logger.debug(str(product))
+        logging.debug(str(product))
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
@@ -118,10 +118,10 @@ class TestProductModel(unittest.TestCase):
     def test_update_a_product(self):
         """It should Update a Product"""
         product = ProductFactory()
-        logger.debug(str(product))
+        logging.debug(str(product))
         product.id = None
         product.create()
-        logger.debug(str(product))
+        logging.debug(str(product))
         self.assertIsNotNone(product.id)
 
         product.description = "new description"
@@ -141,7 +141,7 @@ class TestProductModel(unittest.TestCase):
         product.create()
         self.assertEqual(len(Product.all()), 1)
 
-        prodcut.delete()
+        product.delete()
         self.assertEqual(len(Product.all()), 0)
 
     def test_list_all_products(self):
@@ -151,19 +151,19 @@ class TestProductModel(unittest.TestCase):
 
         for _ in range(5):
             product = ProductFactory()
-            prodcut.create()
+            product.create()
         self.assertEqual(len(Product.all()), 5)
 
-    def test_find_prodcut_by_name(self):
-        """It should Find prodcuts by Name"""
+    def test_find_product_by_name(self):
+        """It should Find products by Name"""
         products = ProductFactory.create_batch(5)
         for product in products:
-            prodcut.create()
+            product.create()
         name = products[0].name
         count = len([product for product in products if product.name == name])
         found = Product.find_by_name(name)
         self.assertEqual(found.count(), count)
-        for prodcut in found:
+        for product in found:
             self.assertEqual(product.name, name)
 
     def test_find_product_by_availability(self):
