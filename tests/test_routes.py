@@ -32,6 +32,7 @@ from service import app
 from service.common import status
 from service.models import db, init_db, Product
 from tests.factories import ProductFactory
+from urllib.parse import quote_plus
 
 # Disable all but critical errors during normal test run
 # uncomment for debugging failing tests
@@ -214,6 +215,52 @@ class TestProductRoutes(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         new_count = self.get_product_count()
         self.assertEqual(new_count, product_count - 1)
+
+    def test_get_product_list(self):
+        """It should Get a list of Products"""
+        self._create_products(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+
+    def test_query_by_name(self):
+        """It should Query Products by name"""
+        products = self._create_products(5)
+        test_name = products[0].name
+        name_count = len([product for product in products if product.name == test_name])
+        response = self.client.get(
+            BASE_URL, query_string=f"name={quote_plus(test_name)}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), name_count)
+        # check the data just to be sure
+        for product in data:
+            self.assertEqual(product["name"], test_name)
+
+    
+    
+    
+    
+    
+    
+    def test_query_by_category(self):
+        """It should Query Products by category"""
+        products = self._create_products(10)
+        category = products[0].category
+        found = [product for product in products if product.category == category]
+        found_count = len(found)
+        logging.debug("Found Products [%d] %s", found_count, found)
+
+        # test for available
+        response = self.client.get(BASE_URL, query_string=f"category={category.name}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), found_count)
+        # check the data just to be sure
+        for product in data:
+            self.assertEqual(product["category"], category.name)
 
     ######################################################################
     # Utility functions
